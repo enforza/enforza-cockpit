@@ -1,0 +1,495 @@
+
+/* ── Theme variables ──────────────────────────────────────────────────────────
+   Default :root carries the light (GitHub) palette. :root[data-theme="dark"]
+   overrides those with the same dark palette used by the engine's /logs
+   viewer so the SaaS console + the data-endpoint viewer feel like one product
+   in either mode. Theme is toggled via the header button (Layout.tsx), stored
+   in localStorage as "enforza-console-theme".
+
+   Note: a lot of the existing UI uses inline style props with hard-coded hex
+   codes (e.g. style={{ color: "#1f2328" }}). Those don't pick up these vars
+   yet — we'll migrate them page-by-page. This first cut handles the global
+   chrome: body, header, gh-box card chrome, gh-detail-rows, the gh-* button
+   variants, and a handful of common GitHub-palette classes. Pages with lots
+   of inline-styled colour will look correct only for components that already
+   use the gh-* classes; the rest stays light until migrated.
+*/
+:root {
+  --gh-canvas:           #f6f8fa;
+  --gh-canvas-inset:     #f6f8fa;
+  --gh-surface:          #ffffff;
+  --gh-fg:               #1f2328;
+  --gh-muted:            #636c76;
+  --gh-subtle:           #6e7781;
+  --gh-border:           #d0d7de;
+  --gh-border-muted:     #d8dee4;
+  --gh-accent:           #0969da;
+  --gh-success:          #1a7f37;
+  --gh-success-subtle:   #dafbe1;
+  --gh-success-border:   rgba(26,127,55,0.4);
+  --gh-danger:           #cf222e;
+  --gh-danger-subtle:    #ffebe9;
+  --gh-attention:        #9a6700;
+  --gh-attention-subtle: #fff8c5;
+  --gh-neutral-subtle:   #eaeef2;
+  --gh-btn-bg:           #f6f8fa;
+  --gh-btn-hover:        #f3f4f6;
+  --gh-btn-border:       rgba(31,35,40,0.15);
+  --gh-input-bg:         #ffffff;
+  --gh-row-hover:        rgba(208, 215, 222, 0.48);
+}
+
+:root[data-theme="dark"] {
+  --gh-canvas:           #010409;
+  --gh-canvas-inset:     #0d1117;
+  --gh-surface:          #0d1117;
+  --gh-fg:               #c9d1d9;
+  --gh-muted:            #8b949e;
+  --gh-subtle:           #6e7681;
+  --gh-border:           #30363d;
+  --gh-border-muted:     #21262d;
+  --gh-accent:           #58a6ff;
+  --gh-success:          #3fb950;
+  --gh-success-subtle:   rgba(63,185,80,0.18);
+  --gh-success-border:   rgba(63,185,80,0.4);
+  --gh-danger:           #f85149;
+  --gh-danger-subtle:    rgba(248,81,73,0.15);
+  --gh-attention:        #d29922;
+  --gh-attention-subtle: rgba(210,153,34,0.18);
+  --gh-neutral-subtle:   rgba(110,118,129,0.18);
+  --gh-btn-bg:           #21262d;
+  --gh-btn-hover:        #30363d;
+  --gh-btn-border:       rgba(240,246,252,0.1);
+  --gh-input-bg:         #0d1117;
+  --gh-row-hover:        rgba(110,118,129,0.15);
+}
+
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+      Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--gh-fg);
+    background-color: var(--gh-canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* GitHub header nav links
+   Matches GitHub's AppHeader light-mode underline nav:
+   - dark text on light grey header
+   - active tab: 2px orange bottom border (#F5873C = GitHub's --color-underlinenav-border-active)
+*/
+.gh-nav-link {
+  color: var(--gh-fg);
+  background-color: transparent;
+  padding: 0 4px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: flex-end;
+  height: 41px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.gh-nav-link.active {
+  font-weight: 600;
+  border-bottom-color: #F5873C;
+}
+
+/* Pill highlight wraps only the icon+text, not the full cell height */
+.gh-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.1s;
+}
+.gh-nav-link:hover .gh-nav-pill {
+  background-color: var(--gh-row-hover);
+}
+
+/* Invisible bold copy reserves the bold width so switching active state
+   never shifts surrounding items. The ::after block is zero-height and
+   hidden — it contributes only to the element's inline width. */
+.gh-nav-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gh-nav-label::after {
+  content: attr(data-label);
+  font-weight: 600;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* GitHub-style primary button */
+.gh-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  /* Brand accent (orange), not GitHub green — the console is Enforza-branded.
+     Orange is bright, so it carries dark text (matches .ccx-btn-primary). */
+  color: var(--ccx-text-on-accent, #1A0E05);
+  background-color: var(--ccx-accent, #F5873C);
+  border: 1px solid rgba(31, 35, 40, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gh-btn-primary:hover:not(:disabled) {
+  background-color: var(--ccx-accent-hover, #E07429);
+}
+.gh-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* GitHub-style default button */
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--gh-fg);
+  background-color: var(--gh-btn-bg);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gh-btn:hover:not(:disabled) {
+  background-color: var(--gh-btn-hover);
+}
+.gh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Small button variant */
+.gh-btn-sm {
+  padding: 3px 12px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/* GitHub-style danger text link */
+.gh-btn-danger-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #cf222e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.1s;
+}
+.gh-btn-danger-text:hover:not(:disabled) {
+  color: #a40e26;
+  text-decoration: underline;
+}
+.gh-btn-danger-text:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* GitHub-style text link button */
+.gh-btn-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0969da;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.1s;
+}
+.gh-btn-link:hover {
+  color: #0550ae;
+  text-decoration: underline;
+}
+
+/* GitHub-style input */
+.gh-input {
+  display: block;
+  width: 100%;
+  padding: 5px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gh-fg);
+  background-color: var(--gh-input-bg);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.gh-input:focus {
+  border-color: var(--gh-accent);
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+.gh-input:disabled {
+  background-color: var(--gh-canvas-inset);
+  color: var(--gh-muted);
+  cursor: not-allowed;
+}
+
+/* GitHub-style select */
+.gh-select {
+  display: block;
+  width: 100%;
+  padding: 5px 32px 5px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--gh-fg);
+  background-color: var(--gh-input-bg);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2357606a' d='M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.gh-select:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+/* GitHub Box component */
+.gh-box {
+  background-color: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+/* Subtle border darken on hover for the 3-up GitHub-installation grid
+   so the whole card reads as a click target. */
+.gh-installation-card:hover {
+  border-color: var(--gh-muted);
+  cursor: pointer;
+}
+.gh-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 16px;
+  background-color: var(--gh-canvas-inset);
+  border-bottom: 1px solid var(--gh-border);
+}
+.gh-box-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gh-fg);
+}
+.gh-box-body {
+  padding: 16px;
+}
+
+/* Row list used inside gh-box cards (e.g. Dashboard detail rows).
+   Adds a 1px divider between rows without adding one between the
+   gh-box-header border-bottom and the first row. */
+.gh-detail-rows > * + * {
+  border-top: 1px solid var(--gh-border);
+}
+
+/* GitHub-style Label (badge/pill) */
+.gh-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  border-radius: 2em;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.gh-label-success {
+  background-color: #dafbe1;
+  color: #1a7f37;
+  border-color: rgba(26, 127, 55, 0.4);
+}
+.gh-label-neutral {
+  background-color: #eaeef2;
+  color: #57606a;
+  border-color: rgba(87, 96, 106, 0.4);
+}
+.gh-label-danger {
+  background-color: #ffebe9;
+  color: #cf222e;
+  border-color: rgba(207, 34, 46, 0.4);
+}
+.gh-label-accent {
+  background-color: #ddf4ff;
+  color: #0550ae;
+  border-color: rgba(5, 80, 174, 0.4);
+}
+.gh-label-attention {
+  background-color: #fff8c5;
+  color: #9a6700;
+  border-color: rgba(154, 103, 0, 0.4);
+}
+
+/* GitHub-style avatar dropdown menu */
+.gh-menu {
+  background-color: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+  overflow: hidden;
+}
+.gh-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 16px;
+  font-size: 14px;
+  color: var(--gh-fg);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+.gh-menu-item:hover {
+  /* Match the top nav pill hover — same subtle row-hover tint, fg
+     stays unchanged. Avoids the previous "blue strip" treatment that
+     fought the rest of the chrome. */
+  background-color: var(--gh-row-hover);
+  color: var(--gh-fg);
+  text-decoration: none;
+}
+
+/* GitHub-style table */
+.gh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.gh-table th {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gh-muted);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--gh-border);
+  background-color: var(--gh-canvas-inset);
+}
+.gh-table td {
+  padding: 10px 16px;
+  color: var(--gh-fg);
+  border-top: 1px solid var(--gh-border);
+  vertical-align: middle;
+}
+.gh-table tbody tr:hover {
+  background-color: var(--gh-row-hover);
+}
+
+/* Flash / alert banners */
+.gh-flash-success {
+  padding: 12px 16px;
+  background-color: #dafbe1;
+  border: 1px solid rgba(26, 127, 55, 0.4);
+  border-radius: 6px;
+  color: #1a7f37;
+  font-size: 14px;
+}
+.gh-flash-error {
+  padding: 12px 16px;
+  background-color: #ffebe9;
+  border: 1px solid rgba(207, 34, 46, 0.4);
+  border-radius: 6px;
+  color: #cf222e;
+  font-size: 14px;
+}
+.gh-flash-attention {
+  padding: 12px 16px;
+  background-color: #fff8c5;
+  border: 1px solid rgba(154, 103, 0, 0.4);
+  border-radius: 6px;
+  color: #9a6700;
+  font-size: 14px;
+}
+
+/* Underline step bar */
+.gh-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* enforza wordmark — light/dark variant swap.
+   Both <img>s render in markup; only the matching one is visible.
+   index.html's bootstrap script sets data-theme="dark" before mount
+   so there's no flicker on first paint. */
+.enforza-logo-dark  { display: none; }
+:root[data-theme="dark"] .enforza-logo-light { display: none; }
+:root[data-theme="dark"] .enforza-logo-dark  { display: block; }
+
+/* ─── Leaflet fleet map ──────────────────────────────────────────────────
+   The standard OSM tile layer is colourful; we want a neutral grey base
+   so the orange device markers carry the visual weight. CSS filters on
+   the tile <img>s give us that without a third-party tile provider.
+
+   The slight contrast/brightness bumps after grayscale compensate for
+   the slight haze that grayscale-only produces on default OSM tiles. */
+.enforza-grayscale-tiles {
+  filter: grayscale(100%) contrast(1.05) brightness(1.02);
+}
+:root[data-theme="dark"] .enforza-grayscale-tiles {
+  /* Dark mode — invert to get a near-black base, then re-darken slightly
+     so it sits under the surrounding panels without glowing. */
+  filter: grayscale(100%) invert(1) contrast(0.9) brightness(0.85);
+}
+
+/* Leaflet's default popup chrome is light-only; recolour for our theme. */
+.leaflet-popup-content-wrapper {
+  background: var(--gh-surface);
+  color: var(--gh-fg);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.leaflet-popup-tip { background: var(--gh-surface); }
+.leaflet-popup-content { margin: 8px 12px; }
+
+/* Attribution text — Leaflet adds an "Improve this map" link we don't
+   need; the OSM credit alone is enough. */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+:root[data-theme="dark"] .leaflet-control-attribution {
+  background: rgba(11, 12, 16, 0.7) !important;
+  color: var(--gh-fg-muted) !important;
+}
+:root[data-theme="dark"] .leaflet-control-attribution a {
+  color: var(--gh-fg-muted) !important;
+}
+
+/* Zoom buttons — match GH-style panel borders. */
+.leaflet-bar a, .leaflet-bar a:hover {
+  background: var(--gh-surface) !important;
+  color: var(--gh-fg) !important;
+  border-bottom-color: var(--gh-border) !important;
+}

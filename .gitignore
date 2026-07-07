@@ -14,9 +14,12 @@ __pycache__/
 .venv/
 venv/
 
-# Node / Cockpit build output
+# Node
 node_modules/
-dist/
+
+# NOTE: dist/ is intentionally tracked. The Cockpit plugin is plain static
+# HTML/CSS/JS (no build step) — dist/ IS the source that deploy.sh copies to
+# /usr/share/cockpit/enforza, not generated output.
 
 # Local logs / scratch
 *.log

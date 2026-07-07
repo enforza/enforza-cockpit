@@ -1,0 +1,448 @@
+/*
+ * firewall.css — page-specific chrome for the enforza-cockpit firewall GUI.
+ *
+ * Everything here is expressed in the CCX design tokens (--ccx-*) so the plugin
+ * matches the enforza CCX console. The React app builds most of this with inline
+ * style props; here the same recipes live as classes that firewall.js attaches.
+ */
+
+/* Box-sizing reset. The CCX app relied on Tailwind's preflight for this; we
+   stripped the @tailwind directives when porting the CSS, so restore it here.
+   Without it, `.ccx-input { width:100%; padding + border }` overflows its
+   container (inputs run off the edge of the drawer / dialog). */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Root fills the Cockpit iframe. */
+.efz-root { min-height: 100vh; }
+
+.efz-boot {
+    padding: 48px;
+    color: var(--ccx-text-tertiary);
+    font-size: 14px;
+}
+
+/* ── Top bar: brand identity (left) + "created by enforza" + actions (right) ── */
+.efz-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ccx-space-lg);
+    height: 68px;
+    padding: 0 var(--ccx-space-xl);
+    background: var(--ccx-surface);
+    border-bottom: 1px solid var(--ccx-border-subtle);
+}
+
+.efz-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* Flame glyph on the enforza dark chip, exactly as enforza.io renders it. */
+.efz-brand__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #1f2328;
+    flex-shrink: 0;
+}
+.efz-brand__glyph img { width: 26px; height: 26px; display: block; }
+
+.efz-brand__text { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.efz-brand__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ccx-text-primary);
+    letter-spacing: -0.01em;
+}
+.efz-brand__sub {
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ccx-text-tertiary);
+    font-weight: 500;
+    font-family: var(--ccx-font-mono);
+}
+
+.efz-topbar__actions { display: inline-flex; align-items: center; gap: var(--ccx-space-lg); }
+
+/* "created by" caption stacked above the enforza wordmark, linking home. */
+.efz-createdby {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: var(--ccx-space-lg);
+    border-right: 1px solid var(--ccx-border-subtle);
+}
+.efz-createdby__label {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ccx-text-tertiary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.efz-createdby__logo { height: 22px; display: block; }
+/* The wordmark PNG is dark ink for light backgrounds; on our dark chrome we
+   lift it to near-white so it reads. On light theme it stays as-is. */
+:root[data-theme="dark"] .efz-createdby__logo { filter: brightness(0) invert(1); opacity: 0.92; }
+
+/* Icon button in the top bar (theme toggle / refresh). */
+.efz-iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--ccx-radius-md);
+    background: transparent;
+    color: var(--ccx-text-secondary);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--ccx-duration-fast) var(--ccx-ease),
+                color var(--ccx-duration-fast) var(--ccx-ease);
+}
+.efz-iconbtn:hover { background: var(--ccx-surface-raised); color: var(--ccx-text-primary); }
+
+/* ── Main content pane ─────────────────────────────────────────────────────── */
+.ccx-main { padding: var(--ccx-space-xl); max-width: 1280px; margin: 0 auto; }
+
+.efz-policy-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ccx-space-lg);
+    margin-bottom: var(--ccx-space-lg);
+}
+.efz-policy-title { font-size: 20px; font-weight: 600; color: var(--ccx-text-primary); }
+.efz-policy-host {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--ccx-text-secondary);
+    font-family: var(--ccx-font-mono);
+}
+
+/* ── Tab strip (PolicyTabs) ────────────────────────────────────────────────── */
+.efz-tabs-wrap { padding: 12px 0; border-bottom: 1px solid var(--ccx-border-subtle); margin-bottom: 16px; }
+.efz-tabs-grouplabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ccx-text-tertiary);
+}
+.efz-tabs-grouplabel span.rule { flex: 1; height: 1px; background: var(--ccx-border-subtle); }
+.efz-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+.efz-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 14px;
+    background: var(--ccx-surface-raised);
+    border: 1px solid var(--ccx-border-default);
+    border-radius: var(--ccx-radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ccx-text-secondary);
+    transition: background-color var(--ccx-duration-fast) var(--ccx-ease),
+                color var(--ccx-duration-fast) var(--ccx-ease),
+                border-color var(--ccx-duration-fast) var(--ccx-ease);
+}
+.efz-tab:hover { color: var(--ccx-text-primary); }
+.efz-tab.is-active {
+    background: var(--ccx-surface);
+    border-bottom: 2px solid var(--ccx-accent);
+    padding-bottom: 7px;
+    font-weight: 600;
+    color: var(--ccx-text-primary);
+}
+.efz-tab__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ccx-accent-bg);
+    color: var(--ccx-brand-orange-on-dark);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ── Section card ──────────────────────────────────────────────────────────── */
+.efz-section {
+    background: var(--ccx-surface);
+    border: 1px solid var(--ccx-border-default);
+    border-radius: var(--ccx-radius-lg);
+    padding: var(--ccx-space-xl);
+    box-shadow: var(--ccx-shadow-1);
+}
+.efz-section__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.efz-section__title { font-size: 16px; font-weight: 600; color: var(--ccx-text-primary); }
+.efz-section__id {
+    margin-left: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    font-family: var(--ccx-font-mono);
+    color: var(--ccx-text-tertiary);
+}
+.efz-section__blurb {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ccx-text-secondary);
+    max-width: 760px;
+}
+
+/* Read-only default-action pill (chain policy). */
+.efz-default {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.efz-default__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ccx-text-tertiary);
+}
+.efz-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+.efz-pill--accept { background: var(--ccx-success-bg); color: var(--ccx-success); }
+.efz-pill--drop   { background: var(--ccx-danger-bg);  color: var(--ccx-danger); }
+
+/* Empty section state. */
+.efz-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--ccx-text-tertiary);
+    font-size: 13px;
+    border: 1px dashed var(--ccx-border-subtle);
+    border-radius: var(--ccx-radius-sm);
+}
+
+/* Monospace rule-table cells + token chips. */
+.efz-mono { font-family: var(--ccx-font-mono); }
+.efz-any { color: var(--ccx-text-tertiary); }
+.efz-flag {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    margin-right: 4px;
+    border-radius: var(--ccx-radius-sm);
+    background: var(--ccx-surface-raised);
+    border: 1px solid var(--ccx-border-default);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--ccx-text-secondary);
+}
+
+/* Error / flash banner. */
+.efz-flash {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--ccx-radius-md);
+    background: var(--ccx-danger-bg);
+    border: 1px solid var(--ccx-danger);
+    color: var(--ccx-text-primary);
+    font-size: 13px;
+}
+.efz-flash pre {
+    margin: 6px 0 0;
+    font-family: var(--ccx-font-mono);
+    font-size: 12px;
+    color: var(--ccx-text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Small responsive nicety — stack the brand + actions on narrow frames. */
+@media (max-width: 640px) {
+    .efz-topbar { height: auto; flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+    .efz-createdby { border-right: none; padding-right: 0; }
+    .ccx-main { padding: 16px; }
+    .efz-tabs { grid-template-columns: 1fr; }
+}
+
+/* ═══ Editor chrome (rule drawer, object dialogs, apply bar, revert banner) ═══ */
+
+/* Segmented control — action toggle + default-action toggle. */
+.efz-seg { display: inline-flex; border: 1px solid var(--ccx-border-default); border-radius: var(--ccx-radius-sm); overflow: hidden; }
+.efz-seg button {
+    height: 28px; padding: 0 14px; border: none; background: transparent;
+    color: var(--ccx-text-tertiary); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer;
+    border-left: 1px solid var(--ccx-border-default);
+}
+.efz-seg button:first-child { border-left: none; }
+.efz-seg button.is-accept { background: var(--ccx-success-bg); color: var(--ccx-success); }
+.efz-seg button.is-drop { background: var(--ccx-danger-bg); color: var(--ccx-danger); }
+.efz-seg button.is-reject { background: var(--ccx-warning-bg); color: var(--ccx-warning); }
+
+/* Small icon action buttons in table rows / object rows. */
+.efz-rowbtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--ccx-radius-sm);
+    background: transparent; color: var(--ccx-text-tertiary);
+    border: 1px solid transparent; cursor: pointer;
+}
+.efz-rowbtn:hover { background: var(--ccx-surface-raised); color: var(--ccx-text-primary); }
+.efz-rowbtn.danger:hover { color: var(--ccx-danger); }
+.efz-grip { color: var(--ccx-text-tertiary); cursor: grab; display: inline-flex; }
+
+/* Section toolbar (default toggle + add rule). */
+.efz-section__tools { display: inline-flex; align-items: center; gap: 12px; }
+.efz-addbtn {
+    display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+    border-radius: var(--ccx-radius-md); background: var(--ccx-accent); color: var(--ccx-text-on-accent);
+    border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.efz-addbtn:hover { background: var(--ccx-accent-hover); }
+
+/* Sticky apply bar at the bottom of the frame. */
+.efz-appbar {
+    position: sticky; bottom: 0; z-index: 15;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px var(--ccx-space-xl);
+    background: var(--ccx-surface); border-top: 1px solid var(--ccx-border-default);
+    box-shadow: 0 -6px 16px rgba(0,0,0,0.28);
+}
+.efz-appbar__spacer { flex: 1; }
+.efz-dirty { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ccx-text-secondary); }
+.efz-dirty__dot { width: 8px; height: 8px; border-radius: 999px; background: var(--ccx-warning); }
+
+/* Backdrop shared by drawer + dialogs. */
+.efz-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 40; }
+
+/* Right-hand slide-in drawer (rule editor). */
+.efz-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 460px; max-width: 100vw;
+    background: var(--ccx-surface); border-left: 1px solid var(--ccx-border-default);
+    z-index: 41; display: flex; flex-direction: column; box-shadow: var(--ccx-shadow-3);
+}
+.efz-drawer__head, .efz-dialog__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--ccx-border-subtle);
+}
+.efz-drawer__title, .efz-dialog__title { font-size: 15px; font-weight: 600; color: var(--ccx-text-primary); }
+.efz-drawer__body { padding: 20px; overflow-y: auto; flex: 1; }
+.efz-drawer__foot, .efz-dialog__foot {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 16px 20px; border-top: 1px solid var(--ccx-border-subtle);
+}
+
+/* Centered modal dialog (objects + preview). */
+.efz-dialog {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 560px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px);
+    background: var(--ccx-surface); border: 1px solid var(--ccx-border-default);
+    border-radius: var(--ccx-radius-lg); z-index: 41; display: flex; flex-direction: column;
+    box-shadow: var(--ccx-shadow-3);
+}
+.efz-dialog.wide { width: 760px; }
+.efz-dialog__body { padding: 20px; overflow-y: auto; }
+
+/* Form rows. */
+.efz-field { margin-bottom: 16px; }
+.efz-field > label {
+    display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600;
+    color: var(--ccx-text-secondary); letter-spacing: 0.2px;
+}
+.efz-field .hint { margin-top: 4px; font-size: 11px; color: var(--ccx-text-tertiary); }
+.efz-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--ccx-text-primary); }
+select.ccx-input { -webkit-appearance: none; appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A5ADBD' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat: no-repeat; background-position: right 8px center; }
+
+/* Rendered-JSON preview block. */
+.efz-preview-json {
+    margin: 0; padding: 14px; max-height: 46vh; overflow: auto;
+    background: var(--ccx-bg); border: 1px solid var(--ccx-border-default);
+    border-radius: var(--ccx-radius-md); font-family: var(--ccx-font-mono);
+    font-size: 12px; line-height: 1.5; color: var(--ccx-text-secondary); white-space: pre;
+}
+.efz-preview-verdict { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 600; }
+.efz-preview-verdict.ok { color: var(--ccx-success); }
+.efz-preview-verdict.bad { color: var(--ccx-danger); }
+
+/* Confirm-or-revert banner. */
+.efz-revert {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; margin-bottom: 16px;
+    background: var(--ccx-warning-bg); border: 1px solid var(--ccx-warning);
+    border-radius: var(--ccx-radius-md); color: var(--ccx-text-primary); font-size: 13px;
+}
+.efz-revert__count { font-family: var(--ccx-font-mono); font-weight: 700; color: var(--ccx-warning); }
+.efz-revert__spacer { flex: 1; }
+
+/* Objects tab layout. */
+.efz-objtab { display: flex; flex-direction: column; gap: var(--ccx-space-xl); }
+.efz-objtab__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.efz-tag { display: inline-block; margin: 0 4px 4px 0; padding: 2px 8px; border-radius: var(--ccx-radius-sm);
+    background: var(--ccx-surface-raised); border: 1px solid var(--ccx-border-default);
+    font-family: var(--ccx-font-mono); font-size: 11px; color: var(--ccx-text-primary); }
+
+/* ═══ Routing toggle + baseline note ═════════════════════════════════════════ */
+
+/* iOS-style switch used for the "Enable routing" toggle on the title line. */
+.efz-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.efz-switch__label { font-size: 13px; font-weight: 500; color: var(--ccx-text-secondary); }
+.efz-switch__track {
+    position: relative; width: 40px; height: 22px; border-radius: 999px;
+    background: var(--ccx-border-strong); transition: background-color var(--ccx-duration-fast) var(--ccx-ease); flex-shrink: 0;
+}
+.efz-switch__track.on { background: var(--ccx-accent); }
+.efz-switch__knob {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 999px;
+    background: #fff; box-shadow: var(--ccx-shadow-1); transition: transform var(--ccx-duration-fast) var(--ccx-ease);
+}
+.efz-switch__track.on .efz-switch__knob { transform: translateX(18px); }
+.efz-switch[aria-disabled="true"] { opacity: 0.5; cursor: default; }
+
+/* Read-only "engine baseline" note under a section header. */
+.efz-baseline {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-bottom: 12px; padding: 8px 12px;
+    background: var(--ccx-surface-raised); border: 1px solid var(--ccx-border-subtle);
+    border-radius: var(--ccx-radius-sm); font-size: 12px; color: var(--ccx-text-tertiary);
+}
+.efz-baseline code {
+    font-family: var(--ccx-font-mono); color: var(--ccx-text-secondary);
+    background: var(--ccx-bg); padding: 1px 5px; border-radius: 3px; margin: 0 2px;
+}

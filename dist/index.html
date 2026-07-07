@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+  enforza-cockpit — nftables firewall GUI for Cockpit.
+
+  This is a plain static Cockpit component: no framework runtime, no bundler.
+  Cockpit serves these files and injects ../base1/cockpit.js, which exposes the
+  `cockpit` global we use to run `nft` on the host (cockpit.spawn). The look &
+  feel is lifted from the enforza CCX console via ccx/tokens.css + ccx/base.css
+  (the same design tokens the React app uses), so this reads as one product.
+
+  Dark-mode-first, matching CCX: data-theme is set on <html> before paint.
+-->
+<html data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>enforza Firewall</title>
+
+    <!-- Cockpit API. Provides window.cockpit (spawn, user, gettext…). Loaded
+         first so firewall.js can rely on it being present. -->
+    <script src="../base1/cockpit.js"></script>
+
+    <!-- CCX design system. base.css carries the gh-* card/table/button chrome;
+         tokens.css carries the --ccx-* palette + .ccx-app baseline. Load order
+         mirrors the CCX app (base first, tokens second) so --ccx-* wins. -->
+    <link rel="stylesheet" href="ccx/base.css">
+    <link rel="stylesheet" href="ccx/tokens.css">
+    <link rel="stylesheet" href="firewall.css">
+</head>
+
+<!-- .ccx-app applies the CCX page baseline (bg, text colour, font, selection). -->
+<body class="ccx-app">
+    <div id="app" class="efz-root">
+        <!-- Pre-paint placeholder; firewall.js replaces this on load. -->
+        <div class="efz-boot">Loading firewall…</div>
+    </div>
+
+    <!-- render.js exposes window.enforzaRender (policy → nft JSON); load before
+         firewall.js, which consumes it. -->
+    <script src="render.js"></script>
+    <script src="firewall.js"></script>
+</body>
+</html>

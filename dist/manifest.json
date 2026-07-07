@@ -1,0 +1,33 @@
+{
+    "version": 0,
+    "requires": {
+        "cockpit": "266"
+    },
+
+    "//": "enforza-cockpit — a Cockpit menu entry that opens the nftables firewall GUI (index.html). Cockpit serves this package's static files and injects ../base1/cockpit.js at runtime; the plugin opens no port of its own and inherits Cockpit's auth + TLS.",
+
+    "//csp": "The CCX design system + our DOM builder use inline style attributes; Cockpit's strict default CSP would block them (style-src falls back to 'self'). Allow inline styles + local images/data URIs; keep ws/wss so the cockpit channel transport still works.",
+    "content-security-policy": "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'self'; object-src 'none'",
+
+    "menu": {
+        "index": {
+            "label": "Firewall (enforza)",
+            "order": 30,
+            "keywords": [
+                {
+                    "matches": [
+                        "firewall",
+                        "nftables",
+                        "nft",
+                        "enforza",
+                        "rules",
+                        "ruleset",
+                        "input",
+                        "forward",
+                        "output"
+                    ]
+                }
+            ]
+        }
+    }
+}

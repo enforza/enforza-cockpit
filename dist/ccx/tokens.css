@@ -1,0 +1,609 @@
+/**
+ * CCX visual-system tokens.
+ *
+ * Concrete values pulled from 02_design/convergence/07_ccx_visual_system.md.
+ * Dark mode is default; light-mode overrides are gated under
+ * `[data-theme="light"]` for a future opt-in. Tokens are referenced
+ * everywhere as `var(--ccx-*)` — DO NOT introduce parallel `var(--gh-*)`
+ * names in the CCX fork; that's the GPI palette and the two must not
+ * be conflated. If a CCX screen still imports a `gh-*` token, that's a
+ * porting bug to fix as the fork diverges.
+ */
+
+:root {
+  /* Surfaces */
+  --ccx-bg: #0A0C10;
+  --ccx-surface: #11141A;
+  --ccx-surface-raised: #171B23;
+  --ccx-surface-inverse: #F5F5F5;
+
+  /* Text */
+  --ccx-text-primary: #E6E9EF;
+  --ccx-text-secondary: #A5ADBD;
+  --ccx-text-tertiary: #6B7280;
+
+  /* Borders */
+  --ccx-border-subtle: #1C2029;
+  --ccx-border-default: #262B36;
+  --ccx-border-strong: #39414F;
+  --ccx-border-focus: #F5873C;
+
+  /* Brand */
+  --ccx-brand-orange: #F5873C;
+  --ccx-brand-orange-on-dark: #FF9A52;
+
+  /* Accent — Enforza brand orange. CTAs, focus rings, active nav.
+     Per user direction, the accent is the brand-orange itself, NOT the
+     teal originally proposed in the visual-system spec. Semantic
+     success keeps a teal-green to remain distinguishable from CTAs
+     and warnings. */
+  --ccx-accent: #F5873C;
+  --ccx-accent-hover: #E07429;
+  --ccx-accent-bg: rgba(245, 135, 60, 0.12);
+  --ccx-accent-ring: rgba(245, 135, 60, 0.28);
+  /* Text colour for fills painted with --ccx-accent. Orange is bright
+     enough that dark text reads better than white at small sizes. */
+  --ccx-text-on-accent: #1A0E05;
+
+  /* Success — emerald, landed between the original teal (#28BAA9)
+     and a flat green (#16A34A). Reads as "good" but doesn't kill the
+     warmth the rest of the palette carries. */
+  --ccx-success: #16B07A;
+  --ccx-success-bg: rgba(22, 176, 122, 0.14);
+  /* Danger — landed between the original pink (#FF4D7A) and the
+     too-brick red (#DC2626). Crimson-leaning red: clearly "stop",
+     with a touch of warmth so it doesn't feel industrial. */
+  --ccx-danger: #E83E5A;
+  --ccx-danger-bg: rgba(232, 62, 90, 0.14);
+  --ccx-warning: #F5A623;
+  --ccx-warning-bg: rgba(245, 166, 35, 0.12);
+  --ccx-info: #5B9DF9;
+  --ccx-info-bg: rgba(91, 157, 249, 0.12);
+
+  /* Spacing */
+  --ccx-space-xs: 4px;
+  --ccx-space-sm: 8px;
+  --ccx-space-md: 12px;
+  --ccx-space-lg: 16px;
+  --ccx-space-xl: 24px;
+  --ccx-space-2xl: 32px;
+  --ccx-space-3xl: 48px;
+
+  /* Radii */
+  --ccx-radius-sm: 4px;
+  --ccx-radius-md: 6px;
+  /* `radius-lg` is the canonical card radius across CCX. Pinned to
+   * 6px so every surface (page cards, modal dialogs, object panels)
+   * matches the .gh-box chrome from index.css — single visual
+   * vocabulary, no double-radius mismatches. */
+  --ccx-radius-lg: 6px;
+  --ccx-radius-full: 9999px;
+
+  /* Elevation */
+  --ccx-shadow-1: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --ccx-shadow-2: 0 6px 16px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --ccx-shadow-3: 0 24px 48px rgba(0, 0, 0, 0.55), 0 4px 8px rgba(0, 0, 0, 0.35);
+
+  /* Motion */
+  --ccx-duration-fast: 120ms;
+  --ccx-duration-base: 180ms;
+  --ccx-duration-slow: 280ms;
+  --ccx-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Typography */
+  --ccx-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --ccx-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* Light mode opt-in (no in-app toggle yet — left here so a future
+   OS-preference query can flip the root attribute). */
+:root[data-theme="light"] {
+  --ccx-bg: #F7F8FA;
+  --ccx-surface: #FFFFFF;
+  --ccx-surface-raised: #FFFFFF;
+  --ccx-text-primary: #111827;
+  --ccx-text-secondary: #4B5563;
+  --ccx-text-tertiary: #9CA3AF;
+  --ccx-border-subtle: #EEF0F4;
+  --ccx-border-default: #D8DCE3;
+  --ccx-border-strong: #B5BBC7;
+
+  /* Shadows — half-way between the original dark-mode drop and the
+     hairline first pass. Visible lift on the surface but not the
+     industrial drop the dark recipe creates against white. */
+  --ccx-shadow-1: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --ccx-shadow-2: 0 6px 16px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.06);
+  --ccx-shadow-3: 0 18px 36px rgba(15, 23, 42, 0.16), 0 4px 8px rgba(15, 23, 42, 0.08);
+}
+
+/* Page-level baseline. Applied to <body> via a class so we don't
+   collide with the GPI .gh-* baseline that still lives in index.css
+   during the fork transition. */
+.ccx-app {
+  background: var(--ccx-bg);
+  color: var(--ccx-text-primary);
+  font-family: var(--ccx-font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+.ccx-app *::selection {
+  background: var(--ccx-accent-bg);
+  color: var(--ccx-text-primary);
+}
+
+/* Input + button reset within the CCX fork — Tailwind's preflight
+   already does most of this for GPI, but we'd like to be explicit and
+   isolated. */
+.ccx-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--ccx-bg);
+  color: var(--ccx-text-primary);
+  border: 1px solid var(--ccx-border-default);
+  border-radius: var(--ccx-radius-md);
+  font: inherit;
+  outline: none;
+  transition: border-color var(--ccx-duration-fast) var(--ccx-ease),
+              box-shadow var(--ccx-duration-fast) var(--ccx-ease);
+}
+.ccx-input::placeholder {
+  color: var(--ccx-text-tertiary);
+}
+.ccx-input:hover {
+  border-color: var(--ccx-border-strong);
+}
+.ccx-input:focus {
+  border-color: var(--ccx-border-focus);
+  box-shadow: 0 0 0 3px var(--ccx-accent-ring);
+}
+.ccx-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Underline-only input variant — borrowed from FortiCloud's auth
+   screens. No box, just a 1px bottom hairline that thickens to the
+   accent on focus. Sits flush so the field reads as a row, not a
+   chip. Use on auth screens where the form spans the full card
+   width. Don't use in dense forms; the regular .ccx-input is the
+   default. */
+.ccx-input-line {
+  width: 100%;
+  height: 40px;
+  padding: 0 0 4px 0;
+  background: transparent;
+  color: var(--ccx-text-primary);
+  border: none;
+  border-bottom: 1px solid var(--ccx-border-default);
+  border-radius: 0;
+  font: inherit;
+  outline: none;
+  transition: border-bottom-color var(--ccx-duration-fast) var(--ccx-ease);
+}
+.ccx-input-line::placeholder {
+  color: var(--ccx-text-tertiary);
+}
+.ccx-input-line:hover {
+  border-bottom-color: var(--ccx-border-strong);
+}
+.ccx-input-line:focus {
+  border-bottom: 2px solid var(--ccx-accent);
+  padding-bottom: 3px; /* compensate so the field doesn't jump 1px */
+}
+.ccx-input-line:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ccx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ccx-space-sm);
+  /* Compact NGFW-SAAS sizing — tighter than the original 40px chrome
+   * so the page reads as a dense control surface, not a marketing page. */
+  height: 32px;
+  padding: 0 var(--ccx-space-md);
+  border-radius: var(--ccx-radius-md);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--ccx-duration-fast) var(--ccx-ease),
+              border-color var(--ccx-duration-fast) var(--ccx-ease),
+              color var(--ccx-duration-fast) var(--ccx-ease),
+              box-shadow var(--ccx-duration-fast) var(--ccx-ease);
+}
+.ccx-btn:focus-visible {
+  outline: 2px solid var(--ccx-border-focus);
+  outline-offset: 2px;
+}
+.ccx-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ccx-btn-primary {
+  background: var(--ccx-accent);
+  color: var(--ccx-text-on-accent);
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+.ccx-btn-primary:hover:not(:disabled) {
+  background: var(--ccx-accent-hover);
+}
+
+.ccx-btn-secondary {
+  background: var(--ccx-surface-raised);
+  color: var(--ccx-text-primary);
+  border: 1px solid var(--ccx-border-default);
+}
+.ccx-btn-secondary:hover:not(:disabled) {
+  border-color: var(--ccx-border-strong);
+  background: var(--ccx-surface);
+}
+
+.ccx-btn-ghost {
+  background: transparent;
+  color: var(--ccx-text-secondary);
+  border: 1px solid transparent;
+}
+.ccx-btn-ghost:hover:not(:disabled) {
+  background: var(--ccx-surface-raised);
+  color: var(--ccx-text-primary);
+}
+
+.ccx-link {
+  color: var(--ccx-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--ccx-duration-fast) var(--ccx-ease);
+}
+.ccx-link:hover {
+  border-bottom-color: var(--ccx-accent);
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────────
+   Single source of truth for table header styling across CCX. Applies
+   to both the legacy `.gh-table` class (still imported by pages that
+   were lifted from GPI verbatim) and any inline `<th>` rendered
+   directly. Recipe:
+     - bg recessed to page colour so the header reads as a band
+     - text in `--ccx-text-tertiary` (muted, not body)
+     - UPPERCASE tracked label, weight 500
+     - hairline bottom border in subtle border colour
+   Pages that build their own table primitives should reuse the same
+   tokens; the override here covers everything else without forcing a
+   refactor. */
+.ccx-app .gh-table th,
+.ccx-app table thead th {
+  height: 40px;
+  padding: 0 16px;
+  background: var(--ccx-bg);
+  color: var(--ccx-text-tertiary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  /* Default <th> is centre-aligned; explicit left so the label
+     sits flush with the column's body cells, which are left-
+     aligned by default. */
+  text-align: left;
+  border-bottom: 1px solid var(--ccx-border-subtle);
+}
+.ccx-app .gh-table td {
+  /* Canonical CCX cell — explicit row height + middle alignment so
+     every table renders at the same band regardless of whether the
+     cells carry plain text, badges, or 28px action chips. font-size
+     13 picks the body scale; cells that need mono or another size
+     override locally. */
+  height: 56px;
+  padding: 0 16px;
+  font-size: 13px;
+  vertical-align: middle;
+  color: var(--ccx-text-secondary);
+  border-top: 1px solid var(--ccx-border-subtle);
+}
+.ccx-app .gh-table tbody tr:hover td {
+  background: var(--ccx-surface-raised);
+}
+/* Dense variant — used by the live-logs stream where flowing rows at 56px
+   scroll off-screen too fast. Tightens row height + drops to mono 12px so
+   more lines fit in the viewport. */
+.ccx-app .gh-table.gh-table-dense td {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+.ccx-app .gh-table.gh-table-dense th {
+  padding: 6px 12px;
+}
+
+/* Topbar height token — drives where the mobile drawer/backdrop start.
+   Desktop topbar is the single 68px primary row; the mobile media query
+   bumps this to include the second breadcrumb row. */
+.ccx-app { --ccx-topbar-h: 68px; }
+
+/* The dedicated mobile breadcrumb row is hidden on desktop — there the
+   breadcrumb renders inline in the primary row (.ccx-breadcrumb-wrap). */
+.ccx-app .ccx-topbar-crumb-row { display: none; }
+
+/* ── Mobile responsive — AppShell drawer + dashboard stacking ──────────────
+   At <= 768px the desktop sidebar slides off-screen and the topbar burger
+   reveals it as a drawer. Backdrop dims the main pane while open. Above
+   768px these rules are inert and the desktop two-pane layout applies. */
+@media (max-width: 768px) {
+  /* Two-row topbar on mobile: the 68px primary row plus a 40px
+     breadcrumb row below it. The drawer + backdrop are pinned just
+     under the whole topbar, so they read this combined height. */
+  .ccx-app { --ccx-topbar-h: 108px; }
+
+  /* Show the mobile burger button in the topbar. */
+  .ccx-app .ccx-mobile-burger { display: inline-flex !important; }
+
+  /* Move the breadcrumb out of the cramped primary row: hide the inline
+     copy and show the dedicated second row beneath the action chips. */
+  .ccx-app .ccx-breadcrumb-wrap { display: none !important; }
+  .ccx-app .ccx-topbar-crumb-row {
+    display: flex !important;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    min-width: 0;
+    border-top: 1px solid var(--ccx-border-subtle);
+  }
+
+  /* Show any element flagged as mobile-only (e.g. the in-drawer close X). */
+  .ccx-app .ccx-mobile-only { display: inline-flex !important; }
+
+  /* Sidebar becomes a fixed slide-in drawer. translateX hides it
+     off-screen until .is-mobile-open is added by the burger. */
+  .ccx-app .ccx-sidenav {
+    position: fixed !important;
+    top: var(--ccx-topbar-h);
+    left: 0;
+    bottom: 0;
+    width: 80% !important;
+    padding: 16px 12px !important;
+    transform: translateX(-100%);
+    z-index: 30;
+  }
+  .ccx-app .ccx-sidenav.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Backdrop sits between the main pane (z 1) and the drawer (z 30). */
+  .ccx-app .ccx-mobile-backdrop {
+    position: fixed;
+    top: var(--ccx-topbar-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 20;
+  }
+
+  /* Main content gets tighter padding on phones. */
+  .ccx-app .ccx-main { padding: 16px !important; }
+}
+
+/* Dashboard mobile — stack everything, hide the world map. */
+@media (max-width: 768px) {
+  .ccx-app .ccx-dashboard-greeting {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .ccx-app .ccx-dashboard-kpis {
+    grid-template-columns: 1fr !important;
+  }
+  .ccx-app .ccx-dashboard-map { display: none !important; }
+  .ccx-app .ccx-dashboard-bottom {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Hide the desktop sidebar collapse toggle (<< / >>) on mobile —
+   the burger button is the only menu control on phones, and the
+   drawer always renders expanded. Also hides the dashboard action
+   buttons (View firewalls / Deploy firewall) and tightens the KPI
+   card so number + label sit on one row instead of stacked. */
+@media (max-width: 768px) {
+  .ccx-app .ccx-collapse-toggle { display: none !important; }
+  .ccx-app .ccx-dashboard-actions { display: none !important; }
+  .ccx-app .ccx-kpi { gap: 12px; align-items: center !important; }
+  .ccx-app .ccx-kpi-text {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 10px !important;
+    flex: 1;
+    min-width: 0;
+  }
+  .ccx-app .ccx-kpi-value {
+    margin-top: 0 !important;
+    /* Pushed to the right edge of the text block so the value sits
+       beside the icon chip rather than orphaned next to the label. */
+    margin-left: auto !important;
+    font-size: 20px !important;
+    line-height: 24px !important;
+  }
+  .ccx-app .ccx-kpi-hint { display: none !important; }
+}
+
+/* Object Manager mobile — tabs stack 1-column, search bar full width,
+   action toolbars stack their buttons vertically. */
+@media (max-width: 768px) {
+  .ccx-app .ccx-objects-tabs {
+    grid-template-columns: 1fr !important;
+  }
+  .ccx-app .ccx-objects-search {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .ccx-app .ccx-objects-search-input {
+    max-width: 100% !important;
+  }
+  .ccx-app .ccx-objects-toolbar {
+    flex-direction: column !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+  }
+  .ccx-app .ccx-objects-toolbar button {
+    width: 100% !important;
+  }
+}
+
+/* Generic gh-table → card-stack transformation on mobile. Applies to
+   every .gh-table across CCX (policies, firewalls, bindings, objects,
+   sinks…) so each row reads as an independent card with its cells
+   stacked vertically. Column headers (thead) hide on mobile because
+   the data is short-form and the cell ordering carries the label. */
+@media (max-width: 768px) {
+  .ccx-app .gh-box {
+    overflow-x: visible !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  .ccx-app .gh-table,
+  .ccx-app .gh-table tbody,
+  .ccx-app .gh-table tr {
+    display: block !important;
+    width: 100% !important;
+  }
+  .ccx-app .gh-table thead { display: none !important; }
+  .ccx-app .gh-table tr {
+    background: var(--ccx-surface) !important;
+    border: 1px solid var(--ccx-border-default) !important;
+    border-radius: var(--ccx-radius-md) !important;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+  }
+  .ccx-app .gh-table tr:hover td { background: transparent !important; }
+  .ccx-app .gh-table td {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: auto !important;
+    padding: 4px 0 !important;
+    border-top: none !important;
+    text-align: left !important;
+    white-space: normal !important;
+    /* Some dense tables (the live-log / search flow tables) set
+       overflow:hidden + text-overflow:ellipsis inline for their fixed-width
+       desktop columns. In card mode the value must show in full, so clear
+       both — otherwise wrapped cell values get clipped. */
+    overflow: visible !important;
+    text-overflow: clip !important;
+    min-width: 0;
+  }
+  /* Column label drawn from data-label (set in JS by AppShell). Acts
+     as the inline header for each value when rows render as cards. */
+  .ccx-app .gh-table td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 96px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ccx-text-tertiary);
+  }
+  /* Empty / blank column headers (e.g. drag-handle or actions
+     columns) shouldn't reserve the label slot. */
+  .ccx-app .gh-table td[data-label=""]::before { display: none; }
+  /* The last cell on most CCX tables is an action button column
+     (delete / open / etc.). Right-align it so the affordance lands
+     where the thumb expects it. */
+  .ccx-app .gh-table td:last-child {
+    justify-content: flex-end;
+    padding-top: 8px !important;
+    margin-top: 4px;
+    border-top: 1px solid var(--ccx-border-subtle) !important;
+  }
+
+  /* Log-entry detail sheet (DetailPanel, shared by the per-firewall Live Logs /
+     Search and the multi-firewall live-log stream). On phones it goes full
+     screen rather than a 90vw drawer, and its header buttons (Copy JSON + the
+     close [x]) get a uniform tap-friendly height so the icon-only [x] matches
+     the text button instead of rendering a few px shorter. !important beats the
+     component's inline width/border. */
+  .ccx-app .ccx-log-sheet {
+    width: 100vw !important;
+    width: 100dvw !important;
+    border-left: none !important;
+  }
+  .ccx-app .ccx-log-sheet .gh-btn {
+    min-height: 40px;
+    justify-content: center;
+  }
+}
+
+/* Desktop too: keep the log-detail sheet's header buttons the same height. The
+   close [x] is icon-only, so its 14px icon is shorter than the Copy button's
+   text line-box and the button renders a few px shorter — pin both to one
+   height so they line up. (The mobile @media above bumps both to 40px.) */
+.ccx-app .ccx-log-sheet .gh-btn {
+  min-height: 28px;
+  justify-content: center;
+}
+
+/* Policy detail mobile — read-only view. Stacks the header (title +
+   action row), hides edit-only controls (Save / Push / Add rule /
+   per-row Edit-Delete / drag handles / Default-action toggle),
+   collapses the meta-card stat grid + tab strip to a single column. */
+@media (max-width: 768px) {
+  /* Over-licence badge collapses to icon-only on phones so it doesn't
+     crowd the top-bar action cluster. */
+  .ccx-overlicense-badge-label {
+    display: none !important;
+  }
+  .ccx-app .ccx-policy-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  /* Top-of-page action row (Save / Download / Push) wraps to multiple
+     lines on phones rather than overflowing the header. */
+  .ccx-app .ccx-policy-actions {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+  }
+  /* SectionCard header — drops the Default-action toggle + Add rule
+     button onto a new line below the title + blurb, full-width so
+     the toolbar reads as the explicit action affordance for the
+     section rather than a tight cluster jammed next to the title. */
+  .ccx-app .ccx-policy-section-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .ccx-app .ccx-policy-section-header > div:last-child {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+  /* Rule-edit drawer goes full width on phones so the inputs +
+     L3/L7 tab strip aren't crammed into ~225px of a 60vw slot. */
+  .ccx-app .ccx-rule-sheet {
+    width: 100vw !important;
+    border-left: none !important;
+  }
+  .ccx-app .ccx-policy-stats {
+    grid-template-columns: 1fr !important;
+    gap: 6px;
+  }
+  /* Tab strip — was a 6-column grid with the "Firewall Rules" header
+     overlaying the first 3 columns. On mobile drop both grids to a
+     single column and let the header line span naturally. */
+  .ccx-app .ccx-policy-tabs-wrap > div {
+    grid-template-columns: 1fr !important;
+  }
+  .ccx-app .ccx-policy-tabs-wrap > div > div:first-child {
+    grid-column: 1 !important;
+  }
+}
