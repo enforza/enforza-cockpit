@@ -103,7 +103,7 @@ Clone the repo and run the bootstrap script. It detects your package manager
 JSON/Python bindings, `ulogd2`, and Cockpit itself.
 
 ```bash
-git clone https://github.com/synvu/enforza-cockpit.git
+git clone https://github.com/enforza/enforza-cockpit.git
 cd enforza-cockpit
 sudo ./bootstrap.sh
 ```
