@@ -1,59 +1,106 @@
 # enforza-cockpit
 
 **A free, open web GUI for managing local `nftables` firewalls — built for homelabs
-and small cloud instances.**
+and small cloud instances.** A [Cockpit](https://cockpit-project.org/) plugin: install
+it, build your first firewall policy in the browser, and watch per-rule logs land in
+`/var/log/syslog`.
 
-`enforza-cockpit` is a plugin for [Cockpit](https://cockpit-project.org/), the
-web-based server manager that ships with most modern Linux distributions. It gives
-you a clean, point-and-click interface for building and maintaining your
-[`nftables`](https://wiki.nftables.org/) ruleset — no need to hand-edit rules over
-SSH or remember the syntax.
+![The enforza-cockpit policy editor running inside Cockpit — Management tab with a logged SSH/Cockpit accept rule](docs/images/management-rules.png)
 
-It is a free community tool from the makers of **[enforza](https://enforza.io)** — a
-managed cloud-firewall platform. `enforza-cockpit` is fully standalone: it needs no
-account, no cloud connection, and no subscription. It runs entirely on your own box.
+## What you're building
 
-> ⚠️ **Status: early development.** The project is being built in the open. Expect
-> rough edges and breaking changes until the first tagged release.
+Following this guide turns a single Linux box into a **self-contained firewall,
+router, and management console — all in one, standalone.** There's nothing else to
+run and nothing external to depend on:
 
-## Why
+- **Firewall** — the three rule sections (Management / Network / Local) compile to a
+  live `nftables` ruleset that filters traffic *to*, *through*, and *from* the host.
+- **Router / NAT gateway** — flip on **Enable routing** (IP forwarding) and the box
+  routes between its interfaces; mark a Network rule **SNAT** and it masquerades
+  outbound traffic, so it works as an edge gateway for the machines behind it.
+- **Management console** — Cockpit's web UI *is* the console. You build, preview,
+  apply, and log every rule from the browser — no separate controller, no agent
+  phoning home, no cloud account.
 
-`nftables` is powerful, but the learning curve is steep and mistakes can lock you out
-of your own server. Most homelabs and small single-instance cloud deployments don't
-need a heavyweight firewall appliance — they just need a safe, visual way to:
+Because it runs entirely on the one host and inside Cockpit's own auth + TLS, the
+result is a stand-alone appliance: install it on a VM, a home server, or a small
+cloud instance and it's immediately a working firewall/router you manage from a web
+page. (When you need to manage *many* of these from one place, that's where the
+commercial [enforza](https://enforza.io) Cloud Controller comes in — see below.)
 
-- see what rules are currently loaded,
-- add, edit, and reorder rules without syntax errors,
-- open and close ports for the services they run,
-- and keep an audit trail of what changed.
+> **Safety first.** enforza-cockpit manages a live `nftables` firewall. Every
+> apply uses a **confirm-or-revert** model: after you click **Apply**, you have
+> 60 seconds to click **Confirm**, or the previous ruleset is automatically
+> restored. This means a bad rule can't permanently lock you out — but you should
+> still keep a second way onto the box (a console session or a second SSH session)
+> handy the first few times.
 
-`enforza-cockpit` puts that in your browser, secured behind Cockpit's existing
-authentication.
+---
 
-## Features (planned)
+## The same GUI as the enforza Cloud Controller
 
-- **Ruleset viewer** — live view of the running `nftables` configuration, parsed from
-  the native JSON output (`nft -j list ruleset`).
-- **Visual rule editor** — build tables, chains, and rules through forms rather than raw
-  syntax.
-- **Safe apply** — validate changes before they go live, with a rollback timer so a bad
-  rule can't permanently lock you out.
-- **Service presets** — one-click open/close for common services (SSH, HTTP/S, WireGuard,
-  etc.).
-- **Logging** — optional per-rule logging via `ulogd2`, surfaced back in the dashboard.
-- **Homelab-friendly defaults** — sensible starting policies for a single host on a home
-  or small-cloud network.
+enforza-cockpit is **free and open source**, built for homelabs and self-hosted
+servers. The policy editor you're about to use is a faithful **visual replica of the
+GUI in the [enforza](https://enforza.io) Cloud Controller** — the console behind our
+commercial cloud-firewall platform. Same look, same tab layout (Management / Network
+/ Local), same object model, same rule editor.
 
-## Requirements
+The difference is what sits *underneath* it. This community tool is a friendly GUI
+that renders your policy straight to **`nftables`** and lets the Linux kernel do the
+enforcing — nothing more. The commercial offering runs enforza's own
+**single-pass packet-inspection-and-verdict engine**: it classifies flows, applies
+L7 (FQDN/SNI) policy, and decides the vast majority of packets **in-kernel at line
+rate** — a lot more than a static `nftables` ruleset can do on its own.
 
-- A Linux host running **Cockpit** (Debian/Ubuntu, Fedora, RHEL/Rocky/Alma, or similar).
-- **`nftables`** as the active firewall backend.
-- Root/administrator access (Cockpit handles privilege escalation for you).
+If you like the workflow here and want to run it across a fleet — with central
+management, live logs, and L7 egress control — the commercial platform picks up
+where this leaves off.
 
-## Getting started
+### What you get here (free) vs. the enforza Cloud Controller (commercial)
 
-Clone the repo and run the bootstrap script. It installs the packages the plugin
-depends on — `nftables`, the `nftables` JSON/Python bindings, and `ulogd2` for logging.
+| Capability | enforza-cockpit (free) | enforza Cloud Controller (commercial) |
+|------------|:----------------------:|:-------------------------------------:|
+| Visual nftables rule editor (Management / Network / Local sections) | ✅ | ✅ |
+| Network & port **objects** | ✅ | ✅ (Network & VM objects) |
+| Per-rule logging (ALLOW / DENY / REJECT) | ✅ (local syslog) | ✅ **Live log streaming** across the fleet |
+| Confirm-or-revert safe apply | ✅ | ✅ |
+| SNAT / masquerade & IP-forwarding | ✅ | ✅ **Secure NAT Gateway** |
+| **Single-pass packet-inspection & verdict engine** (µs-scale, in-kernel) | ❌ (plain nftables) | ✅ ~49.5 µs p99 first-packet classification |
+| **L7 egress filtering** — FQDN / SNI-based outbound control (no TLS decryption) | ❌ | ✅ |
+| North-South **and** East-West / VPC-to-VPC traffic control | ❌ | ✅ |
+| Cloud **IP-range / Service-Tag imports** (AWS, Azure) | ❌ | ✅ |
+| **Central Cloud Controller console** — live map, health, license usage | ❌ (single host) | ✅ |
+| **Manage many firewalls at once** — push one policy to a whole fleet | ❌ | ✅ |
+| **Policy-as-Code / GitOps** (review & merge policy in a pipeline) | ❌ | ✅ |
+| **Compliance packs** — PCI DSS, ISO 27001, HIPAA, FedRAMP, DORA, CMMC + more | ❌ | ✅ 25 frameworks / 210 controls |
+| **SIEM export** (logs go to *your* SIEM, never through enforza's cloud) | ❌ | ✅ |
+| Multi-cloud & on-prem, self-upgrade with rollback | ❌ | ✅ |
+
+> **In short:** enforza-cockpit gives the homelab a clean GUI wrapper for a local
+> `nftables` firewall. The commercial [enforza](https://enforza.io) platform wraps
+> the same GUI around our own packet-inspection-and-verdict engine and a cloud
+> controller that manages many firewalls at once. Use this free tool for as long as
+> you like — and when you outgrow a single hand-managed host, you'll already know
+> the interface.
+
+---
+
+## 1. What you need
+
+- A Linux server with **root/sudo** access (Debian/Ubuntu, Fedora, RHEL/Rocky/Alma,
+  or openSUSE).
+- Inbound access to **TCP 9090** (Cockpit's web port) from wherever you'll browse
+  from. On a cloud instance, open 9090 in the security group / firewall to *your*
+  IP only.
+- A web browser.
+
+---
+
+## 2. Install the dependencies
+
+Clone the repo and run the bootstrap script. It detects your package manager
+(`apt` / `dnf` / `yum` / `zypper`) and installs `nftables`, the nftables
+JSON/Python bindings, `ulogd2`, and Cockpit itself.
 
 ```bash
 git clone https://github.com/synvu/enforza-cockpit.git
@@ -61,39 +108,252 @@ cd enforza-cockpit
 sudo ./bootstrap.sh
 ```
 
-`bootstrap.sh` detects your package manager (apt / dnf / yum / zypper) and installs:
+The script also enables the core services so they survive a reboot:
 
-| Dependency | Purpose |
-|------------|---------|
-| `nftables` | The firewall engine this GUI manages |
-| `nftables` JSON API (`libnftables` / `python3-nftables`) | Machine-readable rule read/write |
-| `ulogd2` | Userspace logging for netfilter/nftables |
-| `cockpit` | The web console the plugin plugs into (if not already present) |
+- `cockpit.socket` — started immediately (this is what serves the web UI).
+- `nftables.service` — enabled but **not** started with an empty ruleset (so it
+  can't lock you out before you've written a policy).
+- `ulogd2` / `ulogd` — enabled for userspace netfilter logging.
 
-Once dependencies are in place, open Cockpit at `https://<your-host>:9090` and look for
-the **Firewall** (enforza) section.
+When it finishes you should see:
 
-📖 **See [docs/getting-started.md](docs/getting-started.md)** for the full step-by-step:
-installing the plugin, building your first policy, and tailing per-rule logs in
-`/var/log/syslog`.
+```
+[enforza-cockpit] All core dependencies present.
+[enforza-cockpit] Done. Open Cockpit at https://<your-host>:9090 ...
+```
 
-## Security
+---
 
-`enforza-cockpit` runs inside Cockpit and inherits its authentication and TLS. It never
-opens a network port of its own and never phones home. All firewall state stays on your
-machine.
+## 3. Install the plugin into Cockpit
 
-Because a misconfigured firewall can lock you out of a remote box, the plugin is being
-designed around a **confirm-or-revert** model: risky changes must be re-confirmed within
-a timeout, or they automatically roll back.
+The plugin is a set of static files plus a small privileged helper. `deploy.sh`
+copies `dist/` into Cockpit's system package directory
+(`/usr/share/cockpit/enforza`), where `cockpit-ws` serves it to every logged-in
+administrator.
 
-## About enforza
+```bash
+sudo ./deploy.sh
+```
 
-[enforza](https://enforza.io) builds managed, cloud-delivered firewall and egress-control
-for teams that outgrow hand-rolled `iptables`/`nftables`. `enforza-cockpit` is our free
-gift to the homelab and small-instance community — the same firewall mindset, running
-locally, with no strings attached.
+You'll see:
 
-## License
+```
+[enforza-cockpit] deploying .../dist -> /usr/share/cockpit/enforza
+[enforza-cockpit] done. Reload Cockpit in the browser (Ctrl/Cmd+R) to pick up changes.
+```
+
+> Re-run `sudo ./deploy.sh` any time you edit anything under `dist/`, then hard-
+> reload the browser tab.
+
+---
+
+## 4. Open Cockpit and find the plugin
+
+1. Browse to **`https://<your-host>:9090`**.
+2. The certificate is self-signed on a fresh install — accept the browser warning
+   (or install a real cert later).
+3. Log in with a **local system account that can use sudo** (Cockpit uses your OS
+   login; the firewall plugin needs administrative privilege).
+4. If Cockpit shows a **"Limited access"** banner at the top, click it and
+   re-authenticate so the plugin can run privileged commands.
+5. In the left-hand menu, open **Firewall (enforza)**.
+
+You'll land on the **Local firewall policy** page with four tabs:
+
+| Tab            | nftables hook | What it controls |
+|----------------|---------------|------------------|
+| **Management** | `input`       | Traffic **to** the firewall host itself — SSH, the Cockpit port, health checks. |
+| **Network**    | `forward`     | Traffic passing **through** the box between other hosts and the internet. |
+| **Local**      | `output`      | Traffic originating **from** the host — updates, DNS, outbound calls. |
+| **Objects**    | —             | Reusable named network (CIDR) and port sets you can reference in rules. |
+
+Each rule section has a **Default** action (accept / drop). First match wins;
+anything not matched falls through to the default.
+
+---
+
+## 5. Create a simple policy
+
+Let's build a minimal, safe **Management** policy: allow SSH (logged), allow the
+Cockpit port, and log everything else that gets dropped.
+
+### 5a. Set the default action
+
+1. Open the **Management** tab.
+2. Set **Default** to **drop** (it usually is already). This means only traffic
+   you explicitly allow reaches the host.
+
+### 5b. Add an "allow SSH" rule (with logging)
+
+1. Click **Add rule**.
+2. Fill in the drawer:
+   - **Action:** `accept`
+   - **Protocol:** `tcp`
+   - **Destination port:** `22`
+   - **Source:** your admin IP or CIDR (e.g. `203.0.113.10/32`), or `any` to start.
+   - ✅ Tick **Log matches (nft log prefix)** — this is what puts the rule in
+     `/var/log/syslog`.
+   - **Comment:** `SSH from admin` — this text is included in the log line, so make
+     it meaningful.
+3. Click **Add rule**.
+
+![The Add-rule drawer — Action, Protocol, Destination port, Source, the Log matches checkbox, and Comment](docs/images/add-rule-drawer.png)
+
+### 5c. Add an "allow Cockpit" rule
+
+1. **Add rule** again → **Action** `accept`, **Protocol** `tcp`,
+   **Destination port** `9090`, **Source** your admin IP, **Comment**
+   `Cockpit UI`. (Logging optional.)
+2. **Add rule**.
+
+> ⚠️ Always allow SSH (22) **and** Cockpit (9090) from your own IP *before* you
+> apply a default-drop Management policy — otherwise you'll rely on the auto-revert
+> to get back in.
+
+### 5d. (Optional) Add an explicit "log and drop" catch-all
+
+The section **default** action drops silently — a default-policy drop is *not*
+logged. To *see* denied traffic in syslog, add an explicit last rule:
+
+1. **Add rule** → **Action** `drop`, **Protocol** `any`, **Source** `any`,
+   ✅ **Log matches**, **Comment** `catch-all deny`.
+2. **Add rule**. Make sure it sits **last** in the list (drag the ⠿ grip handle to
+   reorder if needed — first match wins).
+
+You can use **Action: reject** instead of `drop` if you'd rather send an active
+rejection (and see `REJECT` in the logs) rather than dropping silently.
+
+### 5e. Preview, apply, confirm
+
+1. Click **Preview** (bottom bar) to render the policy to nftables JSON and
+   dry-run it against the kernel. A green "Valid" banner means the kernel accepts
+   it.
+2. Click **Apply**.
+3. A **confirm-or-revert** banner appears with a 60-second countdown.
+4. **Verify you still have access** — open a new SSH session, or just confirm the
+   Cockpit page is still responsive.
+5. Click **Confirm** to keep the ruleset. (If anything broke, do nothing and it
+   auto-reverts, or click **Revert now**.)
+6. Click **Save** to persist the policy document to `/etc/enforza/policy.json` so
+   it reloads next time.
+
+Your rules are now live in the `inet enforza` nftables table.
+
+### 5f. Beyond Management: Network rules & Objects
+
+The **Network** tab (the `forward` path) is where you turn the box into a gateway:
+rules there can carry both a **LOG** flag and a **SNAT** (masquerade) flag, so
+traffic from the hosts behind the firewall is logged and source-NAT'd out to the
+internet. Reference reusable **@objects** for source/destination and ports to keep
+rules readable.
+
+![Network tab — forward rules with LOG and SNAT flags, referencing @vpc, @web and @infra objects](docs/images/network-rules.png)
+
+The **Objects** tab holds reusable **network** (CIDR/IP) and **port** sets. Define
+`mgmt`, `home-lan`, `web`, `infra` once and reference them by name (`@mgmt`,
+`@web`, …) across any rule — edit the object and every rule using it updates.
+
+![Objects tab — named network objects (home-lan, mgmt, vpc) and port objects (web, infra)](docs/images/objects.png)
+
+---
+
+## 6. Watch the logs in `/var/log/syslog`
+
+Any rule with **Log matches** ticked emits a kernel log line each time it matches.
+enforza-cockpit tags every line with:
+
+- the section name (`to-firewall` / `through-firewall` / `from-firewall`),
+- the **verdict word** — `ALLOW`, `DENY`, or `REJECT`,
+- and your rule's **comment**.
+
+### Tail everything from enforza
+
+```bash
+sudo tail -f /var/log/syslog | grep enforza
+```
+
+A matched SSH accept looks like this (the kernel appends the packet fields):
+
+```
+Jul  8 12:01:22 host kernel: enforza to-firewall ALLOW: SSH from admin IN=eth0 OUT= MAC=... SRC=203.0.113.10 DST=10.0.0.5 ... PROTO=TCP SPT=51514 DPT=22 ...
+```
+
+A dropped packet caught by the catch-all:
+
+```
+Jul  8 12:03:44 host kernel: enforza to-firewall DENY: catch-all deny IN=eth0 OUT= ... PROTO=TCP ... DPT=3389 ...
+```
+
+### Filter by verdict
+
+Because the verdict is a plain word in the prefix, you can grep for exactly what
+you care about:
+
+```bash
+# Only denials
+sudo tail -f /var/log/syslog | grep 'enforza.*DENY'
+
+# Only accepts
+sudo tail -f /var/log/syslog | grep 'enforza.*ALLOW'
+
+# Rejects
+sudo tail -f /var/log/syslog | grep 'enforza.*REJECT'
+
+# One specific rule, by its comment
+sudo tail -f /var/log/syslog | grep 'SSH from admin'
+```
+
+### If your distro uses the journal instead
+
+On systems without `/var/log/syslog` (many `dnf`-based distros), read the kernel
+log through `journalctl`:
+
+```bash
+sudo journalctl -kf | grep enforza
+```
+
+### Generate some traffic to test
+
+From another machine, try to reach an allowed and a blocked port, then watch the
+tail:
+
+```bash
+# allowed (should connect + log ALLOW)
+ssh you@<your-host>
+
+# blocked (should log DENY / REJECT)
+nc -vz <your-host> 3389
+```
+
+---
+
+## 7. Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| **Firewall (enforza)** not in the Cockpit menu | Re-run `sudo ./deploy.sh`, then hard-reload the browser (Ctrl/Cmd+R). |
+| "Could not load policy… administrative access" | Click the **Limited access / Administrative access** button at the top of Cockpit and re-authenticate. |
+| Apply auto-reverted | You didn't click **Confirm** within 60s, or a rule broke your connection. The old ruleset is restored — adjust the rule and try again. |
+| No log lines appear | Confirm the rule has **Log matches** ticked, that you **Applied + Confirmed**, and that matching traffic is actually hitting the rule. Remember the section *default* drop is not logged — add an explicit log+drop rule. |
+| Locked out of the box entirely | Get on via the cloud console / out-of-band access and run `sudo nft flush ruleset` (or `sudo nft delete table inet enforza`) to clear the policy. |
+
+---
+
+## Reference
+
+- **Plugin files (served):** `/usr/share/cockpit/enforza/`
+- **Saved policy:** `/etc/enforza/policy.json`
+- **nftables table:** `inet enforza`
+- **Inspect the live ruleset from the shell:** `sudo nft list table inet enforza`
+- **Cockpit URL:** `https://<your-host>:9090`
+
+---
+
+## About enforza & License
+
+enforza-cockpit is a free, standalone community tool from the makers of
+[enforza](https://enforza.io) — a managed, cloud-delivered firewall and
+egress-control platform. It needs no account, no cloud connection, and no
+subscription; all firewall state stays on your machine.
 
 Released under the [MIT License](LICENSE). Contributions welcome.
