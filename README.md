@@ -357,3 +357,20 @@ egress-control platform. It needs no account, no cloud connection, and no
 subscription; all firewall state stays on your machine.
 
 Released under the [MIT License](LICENSE). Contributions welcome.
+
+### How this was built
+
+This project was developed with AI assistance (Claude). It was architected,
+reviewed, tested on real hosts, and is maintained by a human — the code is read,
+run in production on our own boxes, and supported by us, not shipped unread. It's
+open and MIT-licensed precisely so you don't have to take that on trust: read it,
+run it, break it, and open an issue if anything's wrong.
+
+We're upfront about this because we think it's the honest thing to do — not because
+we think it needs an apology. A firewall ruleset either compiles, filters the right
+packets, and fails safe, or it doesn't; that's true no matter what wrote the first
+draft. We'd rather be judged on whether the tool works than on which tools we used
+to build it. If you find a bug, a bad default, or a security issue, that's a real
+contribution and we genuinely want it — the code is right here to be checked. "It
+was written with AI" isn't a bug report; a failing test case is. Open one and we'll
+fix it.
