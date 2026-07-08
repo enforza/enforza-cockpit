@@ -127,8 +127,19 @@
     function ruleExpr(rule, sectionName, objIndex) {
         const expr = matchExprs(rule, objIndex);
         expr.push({ counter: null });
-        if (rule.log) expr.push({ log: { prefix: `enforza ${sectionName}: ` } });
         const action = rule.action === "accept" ? "accept" : rule.action === "reject" ? "reject" : "drop";
+        if (rule.log) {
+            // Tag the syslog line with the verdict word so operators can grep
+            // /var/log/syslog for ALLOW / DENY / REJECT, and append the rule's
+            // comment for human context. The kernel/nft log prefix is capped at
+            // 127 chars (NF_LOG_PREFIXLEN); overshoot makes nft reject the ruleset,
+            // so we truncate. A trailing space separates the prefix from the packet
+            // fields (IN=… OUT=…) that the kernel appends after it.
+            const verdict = action === "accept" ? "ALLOW" : action === "reject" ? "REJECT" : "DENY";
+            const note = rule.comment ? ` ${String(rule.comment).trim()}` : "";
+            const prefix = `enforza ${sectionName} ${verdict}:${note} `.slice(0, 127);
+            expr.push({ log: { prefix } });
+        }
         expr.push(action === "reject" ? { reject: null } : { [action]: null });
         return expr;
     }

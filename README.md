@@ -71,8 +71,11 @@ sudo ./bootstrap.sh
 | `cockpit` | The web console the plugin plugs into (if not already present) |
 
 Once dependencies are in place, open Cockpit at `https://<your-host>:9090` and look for
-the **Firewall** (enforza) section. Plugin installation instructions will follow as the
-UI lands.
+the **Firewall** (enforza) section.
+
+📖 **See [docs/getting-started.md](docs/getting-started.md)** for the full step-by-step:
+installing the plugin, building your first policy, and tailing per-rule logs in
+`/var/log/syslog`.
 
 ## Security
 
